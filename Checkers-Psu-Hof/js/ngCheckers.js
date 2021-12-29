@@ -61,13 +61,14 @@ app.controller('checkerCtrl', function($scope, $timeout)
         {
             selectedSquare = square;
             resetChoices();
-            setChoices(selectedSquare.x, selectedSquare.y, 1, [], -1, -1);
+            setChoices(selectedSquare.x, selectedSquare.y, 1, [], -1, -1, square.isKing);
         }
         else
         {
             selectedSquare = null;
         }
         console.log($scope.board);
+        console.log(square);
     }
 
     function resetChoices()
@@ -94,16 +95,19 @@ app.controller('checkerCtrl', function($scope, $timeout)
                 becomeKing = becomeKing || becomeKingAfterJump(matado.x,matado.y);
             }
             square.player = selectedSquare.player;
-            square.isking = becomeKing || isKing(square);
+            square.isKing = becomeKing || isKing(square);
             selectedSquare.player = null;
             selectedSquare.isKing = false;
+            $scope.checkGameover();
             $scope.player = $scope.player === RED ? BLACK:RED
         }
     }
 
     function isKing(square)
     {
-        if($scope.player === RED)
+        if(isKing === true)
+            return true;
+        else if($scope.player === RED)
         {
             if(square.y === 0)
                 return true;
@@ -124,7 +128,6 @@ app.controller('checkerCtrl', function($scope, $timeout)
     function jump(jumped)
     {
         jumped.player = null;
-        jumped.isKing = false;
         if($scope.player === RED)
         {
             $scope.redScore++;
@@ -150,13 +153,14 @@ app.controller('checkerCtrl', function($scope, $timeout)
     }
 
     // setChoices erweitern für den König
+    //Depth ist nötig für das Übersrpingen einer anderen Figur
     function setChoices(x, y, depth, matados, oldX, oldY, isKing)
 	{
       if (depth > 10) return;
 
       isKing = isKing || ($scope.player === RED && y == 0) || ($scope.player === BLACK && y == BOARD_WIDTH - 1);
       // Upper Choices
-      if ($scope.player === RED)
+      if ($scope.player === RED && !isKing)
 	  {
         // Upper Left
         if (x > 0 && y > 0)
@@ -213,7 +217,7 @@ app.controller('checkerCtrl', function($scope, $timeout)
       }
 
       // Lower Choices
-      if ($scope.player === BLACK)
+      if ($scope.player === BLACK && !isKing)
 	  {
         // Lower Left
         if (x > 0 && y < BOARD_WIDTH - 1)
@@ -221,13 +225,17 @@ app.controller('checkerCtrl', function($scope, $timeout)
           var LOWER_LEFT = $scope.board[y+1][x-1];
           if (LOWER_LEFT.player)
 		  {
+		    //Wenn sich auf dem LowerLeft Feld eine Spiel Figur von dem Gegner befindet
+		    //dann wird Feld dahinter ermittelt und dorthin gesprungen
             if (LOWER_LEFT.player !== $scope.player)
 			{
+			    //Feld dahinter Ermitteln und abgleichen ob es nicht das Startfeld ist
               if ((x > 1 && y < BOARD_WIDTH - 2) && !(x - 2 === oldX && y + 2 === oldY))
 			  {
                 var LOWER_LEFT_2 = $scope.board[y+2][x-2];
                 if (!LOWER_LEFT_2.player)
 				{
+				    // Taking a Piece and moving to the Filed behind
                   LOWER_LEFT_2.isChoice = true;
                   var jumpers = matados.slice(0);
                   if (jumpers.indexOf(LOWER_LEFT) === -1)
@@ -238,7 +246,6 @@ app.controller('checkerCtrl', function($scope, $timeout)
               }
             }
           }
-
 		  else if (depth === 1)
 		  {
             LOWER_LEFT.isChoice = true;
@@ -275,17 +282,184 @@ app.controller('checkerCtrl', function($scope, $timeout)
         }
       }
 
-      /*if($scope.player === RED && isKing)
+      if($scope.player === RED && isKing)
       {
-            //Lower and Upper Choices for whole Diagonal relativ to the Piece
-            if((x>0 && y < BOARD_WIDTH-1) && )
-      }
+       if (x >= 0 && y < BOARD_WIDTH - 1)
+       {
+       		// Das hier in einen Switchcase um formulieren mit 2 for- Schleifen mit x und y
+                 var LOWER_LEFT = $scope.board[y+1][x-1];
+                 var LOWER_LEFT_3 = $scope.board[y+3][x-3];
+                 var LOWER_LEFT_4 = $scope.board[y+4][x-4];
+                 var LOWER_LEFT_5 = $scope.board[y+5][x-5];
+                 var LOWER_LEFT_6 = $scope.board[y+6][x-6];
+                 var LOWER_LEFT_7 = $scope.board[y+7][x-7];
+            //dieses if in jede Case abfrage packen für jeden Fall
+                 if (LOWER_LEFT.player)
+       		    {
+                   if (LOWER_LEFT.player !== $scope.player)
+                     if ((x > 1 && y < BOARD_WIDTH - 2) && !(x - 2 === oldX && y + 2 === oldY))
+       			     {
+                       var LOWER_LEFT_X = $scope.board[y+2][x-2];
+                       if (!LOWER_LEFT_X.player)
+       				   {
+       				    // Taking a Piece and moving to the Filed behind
+                         LOWER_LEFT_X.isChoice = true;
+                         var jumpers = matados.slice(0);
+                         if (jumpers.indexOf(LOWER_LEFT) === -1)
+                           jumpers.push(LOWER_LEFT);
+                         LOWER_LEFT_2.matados = jumpers;
+                         setChoices(x-2,y+2,depth+1,jumpers,x,y,isKing);
+                       }
+                     }
+                   }
+                 }
+       		  else if (depth === 1)
+       		  {
+                   LOWER_LEFT.isChoice = true;
+                   LOWER_LEFT_3.isChoice = true;
+                   LOWER_LEFT_4.isChoice = true;
+                   LOWER_LEFT_5.isChoice = true;
+                   LOWER_LEFT_6.isChoice = true;
+                   LOWER_LEFT_7.isChoice = true;
+              }
+
+               // Lower Right
+               if (x < BOARD_WIDTH - 1 && y < BOARD_WIDTH - 1)
+       		{
+                 var LOWER_RIGHT = $scope.board[y+1][x+1];
+                 if (LOWER_RIGHT.player)
+       		  {
+                   if (LOWER_RIGHT.player !== $scope.player)
+       			{
+                     if ((x < BOARD_WIDTH - 2 && y < BOARD_WIDTH - 2) && !(x + 2 === oldX && y + 2 === oldY))
+       			  {
+                       var LOWER_RIGHT_2 = $scope.board[y+2][x+2];
+                       if (!LOWER_RIGHT_2.player)
+       				{
+                         LOWER_RIGHT_2.isChoice = true;
+                         var jumpers = matados.slice(0);
+                         if (jumpers.indexOf(LOWER_RIGHT) === -1)
+                           jumpers.push(LOWER_RIGHT);
+                         LOWER_RIGHT_2.matados = jumpers;
+                         setChoices(x+2,y+2,depth+1,jumpers,x,y,isKing);
+                       }
+                     }
+                   }
+                 }
+       		  else if (depth === 1)
+       		  {
+                   LOWER_RIGHT.isChoice = true;
+              }
+            }
+
+             if (x > 0 && y > 0)
+                  		{
+                            var UP_LEFT = $scope.board[y-1][x-1];
+                            if (UP_LEFT.player)
+                  		  {
+                              if (UP_LEFT.player !== $scope.player)
+                  			{
+                                if ((x > 1 && y > 1) && !(x - 2 === oldX && y - 2 === oldY))
+                  			  {
+                                  var UP_LEFT_2 = $scope.board[y-2][x-2];
+                                  if (!UP_LEFT_2.player)
+                  				{
+                                    UP_LEFT_2.isChoice = true;
+                                    var jumpers = matados.slice(0);
+                                    if (jumpers.indexOf(UP_LEFT) === -1)
+                                      jumpers.push(UP_LEFT);
+                                    UP_LEFT_2.matados = jumpers;
+                                    setChoices(x-2,y-2,depth+1,jumpers,x,y, isKing);
+                                  }
+                                }
+                              }
+                            } else if (depth === 1) {
+                              UP_LEFT.isChoice = true;
+                            }
+                          }
+
+                          // Upper Right
+                          if (x < BOARD_WIDTH - 1 && y > 0)
+                  		{
+                            var UP_RIGHT = $scope.board[y-1][x+1];
+                            if (UP_RIGHT.player) {
+                              if (UP_RIGHT.player !== $scope.player)
+                  			{
+                                if ((x < BOARD_WIDTH - 2 && y > 1) && !(x + 2 === oldX && y - 2 === oldY))
+                  			  {
+                                  var UP_RIGHT_2 = $scope.board[y-2][x+2];
+                                  if (!UP_RIGHT_2.player)
+                  				{
+                                    UP_RIGHT_2.isChoice = true;
+                                    var jumpers = matados.slice(0);
+                                    if (jumpers.indexOf(UP_RIGHT) === -1)
+                                      jumpers.push(UP_RIGHT);
+                                    UP_RIGHT_2.matados = jumpers;
+                                    setChoices(x+2,y-2,depth+1,jumpers,x,y, isKing);
+                                  }
+                                }
+                              }
+                            } else if (depth === 1) {
+                              UP_RIGHT.isChoice = true;
+                            }
+                        }
+               }
 
       if($scope.player === BLACK && isKing)
       {
-        //Lower and Upper Choices for whole Diagonal relativ to the Piece
-      }*/
-    }
+      if (x > 0 && y > 0)
+      		{
+                var UP_LEFT = $scope.board[y-1][x-1];
+                if (UP_LEFT.player)
+      		  {
+                  if (UP_LEFT.player !== $scope.player)
+      			{
+                    if ((x > 1 && y > 1) && !(x - 2 === oldX && y - 2 === oldY))
+      			  {
+                      var UP_LEFT_2 = $scope.board[y-2][x-2];
+                      if (!UP_LEFT_2.player)
+      				{
+                        UP_LEFT_2.isChoice = true;
+                        var jumpers = matados.slice(0);
+                        if (jumpers.indexOf(UP_LEFT) === -1)
+                          jumpers.push(UP_LEFT);
+                        UP_LEFT_2.matados = jumpers;
+                        setChoices(x-2,y-2,depth+1,jumpers,x,y, isKing);
+                      }
+                    }
+                  }
+                } else if (depth === 1) {
+                  UP_LEFT.isChoice = true;
+                }
+              }
+
+              // Upper Right
+              if (x < BOARD_WIDTH - 1 && y > 0)
+      		{
+                var UP_RIGHT = $scope.board[y-1][x+1];
+                if (UP_RIGHT.player) {
+                  if (UP_RIGHT.player !== $scope.player)
+      			{
+                    if ((x < BOARD_WIDTH - 2 && y > 1) && !(x + 2 === oldX && y - 2 === oldY))
+      			  {
+                      var UP_RIGHT_2 = $scope.board[y-2][x+2];
+                      if (!UP_RIGHT_2.player)
+      				{
+                        UP_RIGHT_2.isChoice = true;
+                        var jumpers = matados.slice(0);
+                        if (jumpers.indexOf(UP_RIGHT) === -1)
+                          jumpers.push(UP_RIGHT);
+                        UP_RIGHT_2.matados = jumpers;
+                        setChoices(x+2,y-2,depth+1,jumpers,x,y, isKing);
+                      }
+                    }
+                  }
+                } else if (depth === 1) {
+                  UP_RIGHT.isChoice = true;
+                }
+            }
+        }
+      }
 
 
     //Funktion zum setzten der Steine, aufgerufen im HTML
@@ -332,7 +506,18 @@ app.controller('checkerCtrl', function($scope, $timeout)
             return true;
         else
             return false;
-    }
+
+    function checkGameover() {
+            if ($scope.redScore > 7) {
+                gameover = true;
+                winner = RED;
+            }
+            if ($scope.blackScore > 7) {
+                gameover = true;
+                winner = BLACK;
+            }
+            $scope.alert(winner);
+        }
 
 });
 
