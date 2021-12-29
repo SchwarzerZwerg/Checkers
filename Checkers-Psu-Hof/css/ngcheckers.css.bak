@@ -1,0 +1,100 @@
+@charset "utf-8";
+/* CSS Document */
+
+#gameContainer
+{
+background-color: black;
+width: 480px;
+height: 480px;
+padding: 20px;
+}
+
+.row
+{
+width: 100%;
+}
+
+.square
+{
+float: left;
+width: 60px;
+height: 60px;
+}
+
+
+.square:hover
+{
+cursor: pointer;
+opacity: 0.8;
+}
+
+.circle
+{
+border-radius: 50%;
+width: 94%;
+height: 94%;
+margin: 3%;
+color: black;
+text-align: center;
+line-height: 56px;
+}
+
+#startGame
+{
+width: 120px;
+padding: 10px;
+margin-top: 10px;
+text-align: center;
+background-color: black;
+color: white;
+}
+
+#startGame:hover
+{
+color: red;
+cursor: pointer;
+}
+
+#gameContainer, #rankingContainer
+{
+display:inline-block;
+vertical-align: top;
+}
+
+#description
+{
+margin: 20px;
+}
+
+#rankingContainer
+{
+width: 200px;
+margin: 20px;
+}
+
+.rankingListItem, .rowIndicator
+{
+padding: 10px;
+}
+
+.nameIndicator, .scoreIndicator
+{
+display: inline;
+font-weight: bold;
+}
+
+.name, .nameIndicator
+{
+float: left;
+}
+
+.score,.scoreIndicator
+{
+float: right;
+}
+
+.name, .score
+{
+display:inline;
+}
+
