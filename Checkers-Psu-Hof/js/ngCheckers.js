@@ -98,7 +98,6 @@ app.controller('checkerCtrl', function($scope, $timeout)
             square.isKing = becomeKing || isKing(square);
             selectedSquare.player = null;
             selectedSquare.isKing = false;
-            $scope.checkGameover();
             $scope.player = $scope.player === RED ? BLACK:RED
         }
     }
@@ -134,7 +133,7 @@ app.controller('checkerCtrl', function($scope, $timeout)
             if($scope.redScore === 8)
             {
                 $timeout(function(){
-                    gameOver(RED);
+                    gameOver();
                 }, 50)
             }
         }
@@ -144,7 +143,7 @@ app.controller('checkerCtrl', function($scope, $timeout)
             if($scope.blackScore === 8)
             {
                 $timeout(function(){
-                gameOver(BLACK);
+                gameOver();
                 },50)
 
             }
@@ -282,183 +281,13 @@ app.controller('checkerCtrl', function($scope, $timeout)
         }
       }
 
-      if($scope.player === RED && isKing)
+      if(isKing)
       {
-       if (x >= 0 && y < BOARD_WIDTH - 1)
-       {
-       		// Das hier in einen Switchcase um formulieren mit 2 for- Schleifen mit x und y
-                 var LOWER_LEFT = $scope.board[y+1][x-1];
-                 var LOWER_LEFT_3 = $scope.board[y+3][x-3];
-                 var LOWER_LEFT_4 = $scope.board[y+4][x-4];
-                 var LOWER_LEFT_5 = $scope.board[y+5][x-5];
-                 var LOWER_LEFT_6 = $scope.board[y+6][x-6];
-                 var LOWER_LEFT_7 = $scope.board[y+7][x-7];
-            //dieses if in jede Case abfrage packen für jeden Fall
-                 if (LOWER_LEFT.player)
-       		    {
-                   if (LOWER_LEFT.player !== $scope.player)
-                     if ((x > 1 && y < BOARD_WIDTH - 2) && !(x - 2 === oldX && y + 2 === oldY))
-       			     {
-                       var LOWER_LEFT_X = $scope.board[y+2][x-2];
-                       if (!LOWER_LEFT_X.player)
-       				   {
-       				    // Taking a Piece and moving to the Filed behind
-                         LOWER_LEFT_X.isChoice = true;
-                         var jumpers = matados.slice(0);
-                         if (jumpers.indexOf(LOWER_LEFT) === -1)
-                           jumpers.push(LOWER_LEFT);
-                         LOWER_LEFT_2.matados = jumpers;
-                         setChoices(x-2,y+2,depth+1,jumpers,x,y,isKing);
-                       }
-                     }
-                   }
-                 }
-       		  else if (depth === 1)
-       		  {
-                   LOWER_LEFT.isChoice = true;
-                   LOWER_LEFT_3.isChoice = true;
-                   LOWER_LEFT_4.isChoice = true;
-                   LOWER_LEFT_5.isChoice = true;
-                   LOWER_LEFT_6.isChoice = true;
-                   LOWER_LEFT_7.isChoice = true;
-              }
-
-               // Lower Right
-               if (x < BOARD_WIDTH - 1 && y < BOARD_WIDTH - 1)
-       		{
-                 var LOWER_RIGHT = $scope.board[y+1][x+1];
-                 if (LOWER_RIGHT.player)
-       		  {
-                   if (LOWER_RIGHT.player !== $scope.player)
-       			{
-                     if ((x < BOARD_WIDTH - 2 && y < BOARD_WIDTH - 2) && !(x + 2 === oldX && y + 2 === oldY))
-       			  {
-                       var LOWER_RIGHT_2 = $scope.board[y+2][x+2];
-                       if (!LOWER_RIGHT_2.player)
-       				{
-                         LOWER_RIGHT_2.isChoice = true;
-                         var jumpers = matados.slice(0);
-                         if (jumpers.indexOf(LOWER_RIGHT) === -1)
-                           jumpers.push(LOWER_RIGHT);
-                         LOWER_RIGHT_2.matados = jumpers;
-                         setChoices(x+2,y+2,depth+1,jumpers,x,y,isKing);
-                       }
-                     }
-                   }
-                 }
-       		  else if (depth === 1)
-       		  {
-                   LOWER_RIGHT.isChoice = true;
-              }
-            }
-
-             if (x > 0 && y > 0)
-                  		{
-                            var UP_LEFT = $scope.board[y-1][x-1];
-                            if (UP_LEFT.player)
-                  		  {
-                              if (UP_LEFT.player !== $scope.player)
-                  			{
-                                if ((x > 1 && y > 1) && !(x - 2 === oldX && y - 2 === oldY))
-                  			  {
-                                  var UP_LEFT_2 = $scope.board[y-2][x-2];
-                                  if (!UP_LEFT_2.player)
-                  				{
-                                    UP_LEFT_2.isChoice = true;
-                                    var jumpers = matados.slice(0);
-                                    if (jumpers.indexOf(UP_LEFT) === -1)
-                                      jumpers.push(UP_LEFT);
-                                    UP_LEFT_2.matados = jumpers;
-                                    setChoices(x-2,y-2,depth+1,jumpers,x,y, isKing);
-                                  }
-                                }
-                              }
-                            } else if (depth === 1) {
-                              UP_LEFT.isChoice = true;
-                            }
-                          }
-
-                          // Upper Right
-                          if (x < BOARD_WIDTH - 1 && y > 0)
-                  		{
-                            var UP_RIGHT = $scope.board[y-1][x+1];
-                            if (UP_RIGHT.player) {
-                              if (UP_RIGHT.player !== $scope.player)
-                  			{
-                                if ((x < BOARD_WIDTH - 2 && y > 1) && !(x + 2 === oldX && y - 2 === oldY))
-                  			  {
-                                  var UP_RIGHT_2 = $scope.board[y-2][x+2];
-                                  if (!UP_RIGHT_2.player)
-                  				{
-                                    UP_RIGHT_2.isChoice = true;
-                                    var jumpers = matados.slice(0);
-                                    if (jumpers.indexOf(UP_RIGHT) === -1)
-                                      jumpers.push(UP_RIGHT);
-                                    UP_RIGHT_2.matados = jumpers;
-                                    setChoices(x+2,y-2,depth+1,jumpers,x,y, isKing);
-                                  }
-                                }
-                              }
-                            } else if (depth === 1) {
-                              UP_RIGHT.isChoice = true;
-                            }
-                        }
-               }
-
-      if($scope.player === BLACK && isKing)
-      {
-      if (x > 0 && y > 0)
-      		{
-                var UP_LEFT = $scope.board[y-1][x-1];
-                if (UP_LEFT.player)
-      		  {
-                  if (UP_LEFT.player !== $scope.player)
-      			{
-                    if ((x > 1 && y > 1) && !(x - 2 === oldX && y - 2 === oldY))
-      			  {
-                      var UP_LEFT_2 = $scope.board[y-2][x-2];
-                      if (!UP_LEFT_2.player)
-      				{
-                        UP_LEFT_2.isChoice = true;
-                        var jumpers = matados.slice(0);
-                        if (jumpers.indexOf(UP_LEFT) === -1)
-                          jumpers.push(UP_LEFT);
-                        UP_LEFT_2.matados = jumpers;
-                        setChoices(x-2,y-2,depth+1,jumpers,x,y, isKing);
-                      }
-                    }
-                  }
-                } else if (depth === 1) {
-                  UP_LEFT.isChoice = true;
-                }
-              }
-
-              // Upper Right
-              if (x < BOARD_WIDTH - 1 && y > 0)
-      		{
-                var UP_RIGHT = $scope.board[y-1][x+1];
-                if (UP_RIGHT.player) {
-                  if (UP_RIGHT.player !== $scope.player)
-      			{
-                    if ((x < BOARD_WIDTH - 2 && y > 1) && !(x + 2 === oldX && y - 2 === oldY))
-      			  {
-                      var UP_RIGHT_2 = $scope.board[y-2][x+2];
-                      if (!UP_RIGHT_2.player)
-      				{
-                        UP_RIGHT_2.isChoice = true;
-                        var jumpers = matados.slice(0);
-                        if (jumpers.indexOf(UP_RIGHT) === -1)
-                          jumpers.push(UP_RIGHT);
-                        UP_RIGHT_2.matados = jumpers;
-                        setChoices(x+2,y-2,depth+1,jumpers,x,y, isKing);
-                      }
-                    }
-                  }
-                } else if (depth === 1) {
-                  UP_RIGHT.isChoice = true;
-                }
-            }
-        }
+        checkTopRightKing(x, y);
+        checkTopLeftKing(x,y);
+        checkBottomLeftKing(x,y);
+        checkBottomRightKing(x,y);
+      }
       }
 
 
@@ -506,18 +335,184 @@ app.controller('checkerCtrl', function($scope, $timeout)
             return true;
         else
             return false;
+    }
 
-    function checkGameover() {
-            if ($scope.redScore > 7) {
-                gameover = true;
-                winner = RED;
-            }
-            if ($scope.blackScore > 7) {
-                gameover = true;
-                winner = BLACK;
-            }
-            $scope.alert(winner);
+    function gameOver() {
+            if($scope.redScore === 8)
+                $scope.alert(red);
+            else if($scope.blackScore === 8)
+                $scope.alert(black)
         }
 
+    function checkTopRightKing(x, y)
+        {
+          if(x < 7 && y > 0)
+          {
+            if($scope.board[y - 1][x + 1].player === null) //Oben rechts = freies Feld
+            {
+              $scope.board[y - 1][x + 1].isChoice = true;
+              checkTopRightKing(x + 1, y - 1);
+            }
+            else
+            {
+              checkTopRight(x, y);
+            }
+          }
+
+        }
+
+        function checkTopLeftKing(x, y)
+        {
+          if(x > 0 && y > 0)
+          {
+            if($scope.board[y - 1][x - 1].player === null) //Oben links = freies Feld
+            {
+              $scope.board[y - 1][x - 1].isChoice = true;
+              checkTopLeftKing(x - 1, y - 1);
+            }
+            else if($scope.board[y-1][x-1].player !== $scope.player)
+            {
+               $scope.board[y-1][x-1].isChoice = false;
+                checkTopLeft(x, y);
+            }
+            else
+            {
+                checkTopLeft(x,y);
+            }
+          }
+
+        }
+
+        function checkBottomRightKing(x, y)
+        {
+          if(x < 7 && y < 7)
+          {
+            if($scope.board[y + 1][x + 1].player === null) //Unten rechts = freies Feld
+            {
+              $scope.board[y + 1][x + 1].isChoice = true;
+              checkBottomRightKing(x + 1, y + 1);
+            }
+            else
+            {
+              checkBottomRight(x, y);
+            }
+          }
+
+        }
+
+        function checkBottomLeftKing(x, y)
+        {
+          if(x > 0 && y < 7)
+          {
+            if($scope.board[y + 1][x - 1].player === null) //Unten links = freies Feld
+            {
+              $scope.board[y + 1][x - 1].isChoice = true;
+              checkBottomLeftKing(x - 1, y + 1);
+            }
+            else
+            {
+              checkBottomLeft(x, y);
+            }
+          }
+        }
+
+            function checkTopRight(x, y)
+            {
+              var attack = false;
+              if(y > 0)
+              {
+                if($scope.board[y - 1][x + 1].player === null) //Oben rechts = freies Feld
+                {
+                  $scope.board[y - 1][x + 1].isChoice = true; //Freies Feld oben rechts wird Auswahl
+                }
+                else //Oben rechts liegt ein Spieler
+                {
+                  if($scope.board[y - 1][x + 1].player !== $scope.player) //Oben rechts liegt ein Gegner
+                  {
+                    if(x < 6 && y > 1) //Wenn rechts hinter dem Gegner noch Platz ist
+                    {
+                      if($scope.board[y - 2][x + 2].player === null)//Wenn hinter dem Gegner das Feld frei ist
+                      {
+                      $scope.board[y - 2][x + 2].isChoice = true; //Feld hinter Gegner wird ausgewählt
+                      attack = true;
+                      }
+                    }
+                  }
+                }
+              }
+              return attack;
+            }
+
+            function checkTopLeft(x, y)
+            {
+              var attack = false;
+              if($scope.board[y - 1][x - 1].player === null) //Oben links = freies Feld
+              {
+                $scope.board[y - 1][x - 1].isChoice = true; //Freies Feld oben links wird Auswahl
+              }
+              else //Oben links liegt ein Spieler
+              {
+                if($scope.board[y - 1][x - 1].player !== $scope.player) //Oben links liegt ein Gegner
+                {
+                  if(x > 1 && y > 1) //Wenn links hinter dem Gegner noch Platz ist
+                  {
+                    if($scope.board[y - 2][x - 2].player === null)//Wenn hinter dem Gegner das Feld frei ist
+                    {
+                      $scope.board[y - 2][x - 2].isChoice = true; //Feld hinter Gegner wird ausgewählt
+                      attack = true;
+                    }
+                  }
+                }
+              }
+              return attack;
+            }
+
+            function checkBottomRight(x, y)
+            {
+              var attack = false;
+              if($scope.board[y + 1][x + 1].player === null) //Unten rechts = freies Feld
+              {
+                $scope.board[y + 1][x + 1].isChoice = true; //Freies Feld unten rechts wird Auswahl
+              }
+              else //Unten rechts liegt ein Spieler
+              {
+                if($scope.board[y + 1][x + 1].player !== $scope.player) //Unten rechts liegt ein Gegner
+                {
+                  if(x < 6 && y < 6)
+                  {
+                    if($scope.board[y + 2][x + 2].player === null) //Wenn hinter dem Gegner das Feld frei ist
+                    {
+                      $scope.board[y + 2][x + 2].isChoice = true; //Feld hinter Gegner wird ausgewählt
+                      attack = true;
+                    }
+                  }
+                }
+              }
+              return attack;
+            }
+
+            function checkBottomLeft(x, y)
+            {
+              var attack = false;
+              if($scope.board[y + 1][x - 1].player === null) //Unten links = freies Feld
+              {
+                $scope.board[y + 1][x - 1].isChoice = true; //Freies Feld unten links wird Auswahl
+              }
+              else //Unten links liegt ein Spieler
+              {
+                if($scope.board[y + 1][x - 1].player !== $scope.player) //Unten links liegt ein Gegner
+                {
+                  if(x > 1 && y < 6)
+                  {
+                    if($scope.board[y + 2][x - 2].player === null) //Wenn hinter dem Gegner das Feld frei ist
+                    {
+                      $scope.board[y + 2][x - 2].isChoice = true; //Feld hinter Gegner wird ausgewählt
+                      attack = true;
+                    }
+                  }
+                }
+              }
+              return attack;
+            }
 });
 
